@@ -15,10 +15,9 @@ import {
   DefaultTheme,
   PaperProvider,
 } from 'react-native-paper';
+import MedicationScreen from './screens/medication';
 import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-
 // Create a bottom tab navigator
 const Tab = createBottomTabNavigator();
 
@@ -88,6 +87,16 @@ const App: React.FC = () => {
               },
             }}
           />
+          <Tab.Screen 
+            name="Meds and Appt" 
+            component={MedicationScreen} 
+            options={{
+              tabBarLabel: 'Puzzle',
+              tabBarIcon: ({ color, size }) => {
+                return <Icon name="timer" size={30} color={"blue"} />;
+              },
+            }}
+            />
           
         </Tab.Navigator>
       </NavigationContainer>
