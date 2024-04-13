@@ -14,6 +14,7 @@ import {
   DefaultTheme,
   PaperProvider,
 } from 'react-native-paper';
+import MedicationScreen from './screens/medication';
 // Create a bottom tab navigator
 const Tab = createBottomTabNavigator();
 
@@ -38,6 +39,7 @@ const App: React.FC = () => {
         <Tab.Screen name="Vitals" component={VitalsScreen} />
         <Tab.Screen name="Puzzles" component={PuzzlesScreen} />
         <Tab.Screen name="Transcription" component={TranscriptionScreen} />
+        <Tab.Screen name="Meds and Appt" component={MedicationScreen} />
       </Tab.Navigator>
     </NavigationContainer>
     </PaperProvider>
