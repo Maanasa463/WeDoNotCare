@@ -6,7 +6,7 @@ import DashboardScreen from './screens/dashboard'; // Page 0
 import VitalsScreen from './screens/vitals'; // Page 1
 import PuzzlesScreen from './screens/puzzles'; // Page 2
 import TranscriptionScreen from './screens/transcription'; // Page 3
-import PuzzleScreen from './screens/puzzle'; // Page 4
+// import PuzzleScreen from './screens/puzzle'; // Page 4
 import {
   Card,
   Title,
@@ -77,16 +77,7 @@ const App: React.FC = () => {
               },
             }}
           />
-          <Tab.Screen
-            name="Puzzles"
-            component={PuzzleScreen}
-            options={{
-              tabBarLabel: 'Puzzle',
-              tabBarIcon: ({ color, size }) => {
-                return <Icon name="home-plus" size={30} color={"blue"} />;
-              },
-            }}
-          />
+          
           <Tab.Screen 
             name="Meds and Appt" 
             component={MedicationScreen} 
