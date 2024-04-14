@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, TextInput, ToastAndroid } from 'react-native';
-import { Provider as PaperProvider } from 'react-native-paper';
+import { View, Text, TextInput, ToastAndroid, Alert } from 'react-native';
+import { Provider as PaperProvider, Button, Divider } from 'react-native-paper';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { styles, theme } from '../stylesheet';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+// import { exec } from 'child_process';
+// import * as WebBrowser from 'expo-web-browser';
+// import CameraRoll from '@react-native-community/cameraroll';
+
 
 type MedicationScreenProps = {
   navigation: NativeStackNavigationProp<any, 'Medication'>;
@@ -21,50 +25,30 @@ const MedicationScreen: React.FC<MedicationScreenProps> = ({ navigation }) => {
   const [appointmentTime, setAppointmentTime] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisible] = useState<boolean>(false);
   const [isAppointmentTimePickerVisible, setAppointmentTimePickerVisible] = useState<boolean>(false);
-  const [recording, setRecording] = useState();
-  const [permissionResponse, requestPermission] = Audio.usePermissions();
-
-  async function startRecording() {
-    try {
-      if (permissionResponse.status !== 'granted') {
-        console.log('Requesting permission..');
-        await requestPermission();
-      }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      console.log('Starting recording..');
-      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecording(recording);
-      console.log('Recording started');
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
-  }
-
-  async function stopRecording() {
-    console.log('Stopping recording..');
-    setRecording(undefined);
-    await recording.stopAndUnloadAsync();
-    await Audio.setAudioModeAsync(
-      {
-        allowsRecordingIOS: false,
-      }
-    );
-    const uri = recording.getURI();
-    console.log('Recording stopped and stored at', uri);
-    const wavFileUri = `${FileSystem.documentDirectory}recording.wav`;
-    await FileSystem.copyAsync({ from: uri, to: wavFileUri });
-  }
-
+  
   const handleMedicationEntry = () => {
     if (medicationName && medicationTime) {
       setMedications([...medications, { name: medicationName, time: medicationTime }]);
       setMedicationName('');
       setMedicationTime(null);
+  
+      const currentTime = new Date();
+      const timeDiff = medicationTime.getTime() - currentTime.getTime();
+    
+      // Set a timeout for the alert
+      setTimeout(() => {
+        // Alert the user to take their meds
+        Alert.alert(
+          "REMINDER",
+          "PLEASE TAKE " + medicationName +  " NOW!",
+          [
+            {
+              text: "OK",
+              onPress: () => console.log("Medication alert acknowledged")
+            }
+          ]
+        );
+      }, timeDiff);
     }
   };
 
@@ -93,29 +77,39 @@ const MedicationScreen: React.FC<MedicationScreenProps> = ({ navigation }) => {
 
   return (
     <PaperProvider>
-      <View style={{ marginBottom: 300, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <TextInput
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
+      <TextInput
           placeholder="Enter medication name"
           value={medicationName}
           onChangeText={(text) => setMedicationName(text)}
         />
-        <Button title="Select Medication Time" onPress={() => setTimePickerVisible(true)} style={styles.container} />
-        {medicationTime && <Text>{`${medicationName}: ${medicationTime.toLocaleTimeString()}`}</Text>}
-        <DateTimePickerModal
-          isVisible={isTimePickerVisible}
-          mode="time"
-          onConfirm={handleTimeConfirm}
-          onCancel={() => setTimePickerVisible(false)}
-        />
+    <Button
+        mode='contained'
+        onPress={() => setTimePickerVisible(true)}
+        style={{ marginVertical: 10, width: '70%', backgroundColor:'#bd9ad6' }} // Apply styles for consistent size and vertical margin
+    >
+       Select Medication Time
+    </Button>
+    {medicationTime && <Text>{`${medicationName}: ${medicationTime.toLocaleTimeString()}`}</Text>}
+    <DateTimePickerModal
+        isVisible={isTimePickerVisible}
+        mode="time"
+        onConfirm={handleTimeConfirm}
+        onCancel={() => setTimePickerVisible(false)}
+    />
 
-        <Button title="Save Medication" onPress={handleMedicationEntry} />
+    <Button
+mode='contained'
+        onPress={handleMedicationEntry}
+        style={{ marginVertical: 10, width: '50%', backgroundColor:'#bd9ad6' }} // Apply styles for consistent size and vertical margin
+    >Save Medication </Button>
 
-        {/* Display logged medications */}
-        {medications.map((medication, index) => (
-          <Text key={index}>{`${medication.name}: ${medication.time.toLocaleTimeString()}`}</Text>
-        ))}
+    {/* Display logged medications */}
+    {medications.map((medication, index) => (
+        <Text key={index}>{`${medication.name}: ${medication.time.toLocaleTimeString()}`}</Text>
+    ))}
 
-        <TextInput
+    <TextInput
           placeholder="Enter appointment date"
           value={appointmentDate ? appointmentDate.toDateString() : ''}
           onFocus={() => setDatePickerVisible(true)}
@@ -127,30 +121,33 @@ const MedicationScreen: React.FC<MedicationScreenProps> = ({ navigation }) => {
           onCancel={() => setDatePickerVisible(false)}
         />
 
-        <Button title="Select Appointment Time" onPress={() => setAppointmentTimePickerVisible(true)} />
+    <Button
+mode='contained'
+        onPress={() => setAppointmentTimePickerVisible(true)}
+        style={{marginVertical: 10, width: '70%', backgroundColor:'#bd9ad6'}} // Apply styles for consistent size and vertical
+    >Select Appointment Time </Button>
 
-        {appointmentTime && <Text>{`Appointment Time: ${appointmentTime.toLocaleTimeString()}`}</Text>}
-        <DateTimePickerModal
-          isVisible={isAppointmentTimePickerVisible}
-          mode="time"
-          onConfirm={handleAppointmentTimeConfirm}
-          onCancel={() => setAppointmentTimePickerVisible(false)}
-        />
-        <Button
-          title={recording ? 'Stop Recording' : 'Start Recording'}
-          onPress={recording ? stopRecording : startRecording}
-        />
+    {appointmentTime && <Text>{`Appointment Time: ${appointmentTime.toLocaleTimeString()}`}</Text>}
+    <DateTimePickerModal
+        isVisible={isAppointmentTimePickerVisible}
+        mode="time"
+        onConfirm={handleAppointmentTimeConfirm}
+        onCancel={() => setAppointmentTimePickerVisible(false)}
+    />
+
+    <Button
+mode='contained'
+        onPress={handleAppointmentEntry}
+        style={{ marginVertical: 10, width: '50%', backgroundColor:'#bd9ad6'}} // Apply styles for consistent size and vertical margin
+    >Save Appointment </Button>
+    {/* Display logged appointments */}
+    {appointments.map((appointment, index) => (
+        <Text key={index}>{`${appointment.date.toDateString()}: ${appointment.time.toLocaleTimeString()}`}</Text>
+    ))}
 
 
-        <Button title="Save Appointment" onPress={handleAppointmentEntry} />
+</View>
 
-        {/* Display logged appointments */}
-        {appointments.map((appointment, index) => (
-          <Text key={index}>{`${appointment.date.toDateString()}: ${appointment.time.toLocaleTimeString()}`}</Text>
-        ))}
-
-
-      </View>
     </PaperProvider>
   );
 };

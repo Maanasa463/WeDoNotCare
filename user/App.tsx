@@ -6,7 +6,8 @@ import DashboardScreen from './screens/dashboard'; // Page 0
 import VitalsScreen from './screens/vitals'; // Page 1
 import PuzzlesScreen from './screens/puzzles'; // Page 2
 import TranscriptionScreen from './screens/transcription'; // Page 3
-// import PuzzleScreen from './screens/puzzle'; // Page 4
+// import MedicationScreen from './screens/medication';
+import Puzzles from './screens/puzzles'; // Page 4
 import {
   Card,
   Title,
@@ -18,6 +19,7 @@ import {
 import MedicationScreen from './screens/medication';
 import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 // Create a bottom tab navigator
 const Tab = createBottomTabNavigator();
 
@@ -59,7 +61,7 @@ const App: React.FC = () => {
           />
           <Tab.Screen
             name="Puzzles"
-            component={PuzzlesScreen}
+            component={Puzzles}
             options={{
               tabBarLabel: 'Puzzles',
               tabBarIcon: ({ color, size }) => {
@@ -79,10 +81,10 @@ const App: React.FC = () => {
           />
           
           <Tab.Screen 
-            name="Meds and Appt" 
+            name="Medication" 
             component={MedicationScreen} 
             options={{
-              tabBarLabel: 'Puzzle',
+              tabBarLabel: 'Medication',
               tabBarIcon: ({ color, size }) => {
                 return <Icon name="timer" size={30} color={"blue"} />;
               },
